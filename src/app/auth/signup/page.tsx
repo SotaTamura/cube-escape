@@ -1,0 +1,78 @@
+"use client";
+
+import { LeftSvg } from "@/app/components";
+import { useAuth } from "@/contexts/AuthContext";
+import Link from "next/link";
+import React, { useEffect, useRef } from "react";
+
+export default function SignupPage() {
+    const { login } = useAuth();
+    const nameRef = useRef<HTMLInputElement | null>(null);
+    const passwordRef = useRef<HTMLInputElement | null>(null);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: nameRef.current?.value,
+                    password: passwordRef.current?.value,
+                }),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                login(data.user);
+            } else if (res.status === 409) {
+                const data = await res.json();
+                alert(data.message || "このユーザー名は既に使用されています");
+            } else {
+                throw new Error("登録に失敗しました");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("エラーが発生しました。もう一度お試しください。");
+        }
+    };
+
+    return (
+        <div className="backGround">
+            <Link href="/" className="block btn fixed top-2 left-2 w-[18dvmin] h-[12dvmin] z-10">
+                <LeftSvg />
+            </Link>
+            <div className="flex flex-col items-center justify-center h-4/5">
+                <div
+                    className="bg-[#aaa] bg-opacity-75 border-[#333]"
+                    style={{
+                        padding: "4dvmin",
+                        borderWidth: "1dvmin",
+                        width: "80dvmin",
+                        maxWidth: "500px",
+                    }}>
+                    <h1 className="font-bold text-center" style={{ fontSize: "8dvmin", marginBottom: "3dvmin" }}>
+                        新規登録
+                    </h1>
+                    <form className="flex flex-col items-center space-y-[2dvmin]" onSubmit={handleSubmit} style={{ fontSize: "2.5dvmin" }}>
+                        <div className="w-full">
+                            <label htmlFor="name" className="block" style={{ marginBottom: "1dvmin", fontSize: "4dvmin" }}>
+                                ユーザー名
+                            </label>
+                            <input ref={nameRef} id="name" name="name" type="text" required className="w-full border-gray-600 focus:outline-none focus:border-blue-500 bg-white text-[16px]" style={{ padding: "1.5dvmin", borderWidth: "0.2dvmin", color: "black" }} />
+                        </div>
+                        <div className="w-full">
+                            <label htmlFor="password" className="block" style={{ marginBottom: "1dvmin", fontSize: "4dvmin" }}>
+                                パスワード
+                            </label>
+                            <input ref={passwordRef} id="password" name="password" type="password" required className="w-full border-gray-600 focus:outline-none focus:border-blue-500 bg-white text-[16px]" style={{ padding: "1.5dvmin", borderWidth: "0.2dvmin", color: "black" }} />
+                        </div>
+                        <button type="submit" className="w-5/6 font-bold text-white bg-gray-600 hover:bg-gray-700" style={{ padding: "1.5dvmin", fontSize: "8dvmin", marginTop: "4dvmin" }}>
+                            登録
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+}
