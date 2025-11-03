@@ -1,9 +1,10 @@
 "use client";
 
 import { LeftSvg } from "@/app/components";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/app/context";
+import { postLogin } from "@/app/fetch";
 import Link from "next/link";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 
 export default function LoginPage() {
     const { login } = useAuth();
@@ -12,21 +13,19 @@ export default function LoginPage() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const res = await fetch(`/api/auth/login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                name: nameRef.current?.value,
-                password: passwordRef.current?.value,
-            }),
-        });
-        const data = await res.json();
-        if (res.ok) {
-            login(data.user);
+        if (!nameRef.current?.value || !passwordRef.current?.value) {
+            window.alert("ユーザー名とパスワードは必須です。");
         } else {
-            window.alert(`ログインに失敗しました: ${data.message}`);
+            const res = await postLogin({
+                name: nameRef.current.value,
+                password: passwordRef.current.value,
+            });
+            const data = await res.json();
+            if (res.ok) {
+                login(data.user);
+            } else {
+                window.alert(data.message);
+            }
         }
     };
 

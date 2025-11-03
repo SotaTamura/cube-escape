@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     description: "A puzzle x action game.",
 };
 
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider } from "@/app/context";
 import App from "@/app/app";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

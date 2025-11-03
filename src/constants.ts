@@ -32,6 +32,10 @@ export type UserType = {
     password: string;
     completedStageIds: number[];
 };
+export type LoginType = {
+    name: string;
+    password: string;
+};
 export type Angle = 0 | 90 | 180 | -90;
 export type StageData = {
     compressionlevel: number;

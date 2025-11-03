@@ -5,7 +5,7 @@ import { use, useEffect, useRef, useState } from "react";
 import { RESOLUTION, STAGE_LEN, STEP, UserType } from "@/constants";
 import Link from "next/link";
 import { hint, loadStage, update } from "@/game/main";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/app/context";
 import { ArrowButton, Checkbox, MenuSvg, NextSvg, RestartSvg } from "@/app/components";
 
 export let app: Application; // pixiアプリケーション
@@ -14,7 +14,7 @@ export let debugContainer: Container;
 export default function Game({ params }: { params: Promise<{ id: string }> }) {
     const id = Number(use(params).id);
     const canvasWrapperRef = useRef<HTMLDivElement>(null);
-    const { user } = useAuth();
+    const { addCompletedStage } = useAuth();
     const [restarter, setRestarter] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     const [isHintShowed, setIsHintShowed] = useState(false);
@@ -22,28 +22,9 @@ export default function Game({ params }: { params: Promise<{ id: string }> }) {
     const [isLoading, setIsLoading] = useState(true);
     const [hintText, setHintText] = useState("");
     const isMobile = window.ontouchstart !== undefined && navigator.maxTouchPoints > 0; // タッチ端末判定
-    let userData: UserType | null;
     let loopId: number;
 
     useEffect(() => {
-        if (user) {
-            (async () => {
-                try {
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${user.id}`, {
-                        cache: "no-store",
-                    });
-                    if (!res.ok) {
-                        userData = null;
-                        return;
-                    }
-                    const data = await res.json();
-                    userData = data.user || null;
-                } catch (error) {
-                    console.error(error);
-                    userData = null;
-                }
-            })();
-        }
         setIsComplete(false);
         setIsHintShowed(false);
         setIsLoading(true);
@@ -80,17 +61,7 @@ export default function Game({ params }: { params: Promise<{ id: string }> }) {
                 accumulator += dt ? dt : 0;
                 while (accumulator >= STEP) {
                     update(async () => {
-                        if (user && userData) {
-                            await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${user.id}`, {
-                                method: "PUT",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                    name: userData.name,
-                                    password: userData.password,
-                                    completedStageIds: [...userData.completedStageIds, id],
-                                }),
-                            });
-                        }
+                        addCompletedStage(id);
                         setIsComplete(true);
                     });
                     accumulator -= STEP;

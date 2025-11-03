@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/app/context";
 import Link from "next/link";
 import { RightSvg } from "./components";
 

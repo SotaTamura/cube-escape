@@ -1,9 +1,10 @@
 "use client";
 
 import { LeftSvg } from "@/app/components";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/app/context";
+import { postUser } from "@/app/fetch";
 import Link from "next/link";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 
 export default function SignupPage() {
     const { login } = useAuth();
@@ -12,28 +13,24 @@ export default function SignupPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: nameRef.current?.value,
-                    password: passwordRef.current?.value,
-                }),
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                login(data.user);
-            } else if (res.status === 409) {
-                const data = await res.json();
-                alert(data.message || "このユーザー名は既に使用されています");
-            } else {
-                throw new Error("登録に失敗しました");
+        if (!nameRef.current?.value || !passwordRef.current?.value) {
+            window.alert("ユーザー名とパスワードは必須です。");
+        } else {
+            try {
+                const res = await postUser({ name: nameRef.current.value, password: passwordRef.current.value });
+                if (res.ok) {
+                    const data = await res.json();
+                    login(data.user);
+                } else if (res.status === 409) {
+                    const data = await res.json();
+                    alert(data.message || "このユーザー名は既に使用されています");
+                } else {
+                    throw new Error("登録に失敗しました");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("エラーが発生しました。もう一度お試しください。");
             }
-        } catch (error) {
-            console.error(error);
-            alert("エラーが発生しました。もう一度お試しください。");
         }
     };
 
