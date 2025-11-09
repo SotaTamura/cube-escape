@@ -4,29 +4,23 @@ import { useAuth } from "@/app/context";
 import { StageType } from "@/constants";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { getStagesByUser } from "../fetch";
+import { useRouter } from "next/navigation";
 
 export default function MyLobby() {
+    const router = useRouter();
     const { user, logout } = useAuth();
     const [stages, setStages] = useState<StageType[]>([]);
 
     useEffect(() => {
-        if (!user) return;
-        (async () => {
-            try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/stage/user/${user.id}`, {
-                    cache: "no-store",
-                });
-                if (!res.ok) {
-                    setStages([]);
-                    return;
-                }
-                const data = await res.json();
-                setStages(data.stages || []);
-            } catch (error) {
-                console.error(error);
-                setStages([]);
-            }
-        })();
+        if (!user) {
+            router.push("/auth/login");
+            router.refresh();
+        } else {
+            (async () => {
+                setStages(await getStagesByUser(user.id));
+            })();
+        }
     }, [user]);
 
     return (

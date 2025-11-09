@@ -3,13 +3,23 @@
 import { UserType } from "@/constants";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useState, ReactNode } from "react";
-import { putUser } from "./fetch";
+import { putUser, putUserName } from "./fetch";
+
+type UserPropertyType =
+    | {
+          property: "name";
+          newData: string;
+      }
+    | {
+          property: "completedStageIds";
+          newData: number[];
+      };
 
 interface AuthContextType {
     user: UserType | null;
     login: (userData: UserType) => void;
     logout: () => void;
-    addCompletedStage: (stageId: number) => Promise<void>;
+    changeUserData: ({ property, newData }: UserPropertyType) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,14 +40,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.refresh();
     };
 
-    const addCompletedStage = async (stageId: number) => {
+    const changeUserData = ({ property, newData }: UserPropertyType) => {
         if (!user) return;
-        const newUserData = { ...user, completedStageIds: [...user.completedStageIds, stageId] };
-        putUser(newUserData);
-        setUser(newUserData);
+        if (property === "name") {
+            const newUserData = { ...user, name: newData };
+            putUserName({ id: user.id, name: newData });
+            setUser(newUserData);
+        } else {
+            const newUserData = { ...user, [property]: newData };
+            putUser(newUserData);
+            setUser(newUserData);
+        }
     };
 
-    return <AuthContext.Provider value={{ user, login, logout, addCompletedStage }}>{children}</AuthContext.Provider>;
+    return <AuthContext.Provider value={{ user, login, logout, changeUserData }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

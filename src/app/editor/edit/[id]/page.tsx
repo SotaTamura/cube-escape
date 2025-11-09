@@ -1,55 +1,67 @@
 "use client";
 
+import { useAuth } from "@/app/context";
+import { deleteStage, getStage, putStage, throwError } from "@/app/fetch";
 import { StageType } from "@/constants";
 import { useRouter } from "next/navigation";
-import React, { use, useEffect, useRef } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 
 export default function EditStage({ params }: { params: Promise<{ id: number }> }) {
     const { id } = use(params);
     const router = useRouter();
+    const { user } = useAuth();
     const titleRef = useRef<HTMLInputElement | null>(null);
     const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
     const codeRef = useRef<HTMLTextAreaElement | null>(null);
+    const [stage, setStage] = useState<StageType | null>(null);
 
     const handleSubmit = async (e: React.MouseEvent) => {
         e.preventDefault();
-        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/stage/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                id,
-                title: titleRef.current?.value,
-                description: descriptionRef.current?.value,
-                code: codeRef.current?.value,
-            }),
-        });
-        router.push("/editor");
-        router.refresh();
+        if (!stage) return;
+        if (!codeRef.current?.value) {
+            window.alert("ステージに何も設置されていません。");
+        } else {
+            putStage({ ...stage, title: titleRef.current?.value || "無題", description: descriptionRef.current?.value || "", code: codeRef.current.value });
+            router.push("/editor");
+            router.refresh();
+        }
     };
     const handleDelete = async (e: React.MouseEvent) => {
         e.preventDefault();
-        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/stage/${id}`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-        });
-        router.push("/editor");
-        router.refresh();
+        if (user && window.confirm("本当にこのステージを削除しますか？")) {
+            const res = await deleteStage(id);
+            if (res.ok) {
+                window.alert("ステージを削除しました。");
+                router.push("/editor");
+                router.refresh();
+            } else {
+                window.alert("ステージの削除に失敗しました。");
+            }
+        }
     };
     useEffect(() => {
-        (async () => {
-            try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/stage/${id}`);
-                const data = await res.json();
-                const stage: StageType = data.stage;
-                if (titleRef.current && descriptionRef.current && codeRef.current) {
-                    titleRef.current.value = stage.title;
-                    descriptionRef.current.value = stage.description;
-                    codeRef.current.value = stage.code;
+        if (!user) {
+            router.push("/auth/login");
+            router.refresh();
+        } else {
+            (async () => {
+                try {
+                    const stageData = await getStage(id);
+                    if (stageData && stageData.creatorId !== user.id) {
+                        router.push("/auth/login");
+                        router.refresh();
+                    }
+                    setStage(stageData);
+                    if (titleRef.current && descriptionRef.current && codeRef.current && stageData) {
+                        titleRef.current.value = stageData.title;
+                        descriptionRef.current.value = stageData.description;
+                        codeRef.current.value = stageData.code;
+                    }
+                } catch (err) {
+                    throwError(err);
                 }
-            } catch (err) {
-                console.error(err);
-            }
-        })();
+            })();
+        }
     }, [id]);
 
     return (

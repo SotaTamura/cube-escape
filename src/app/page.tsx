@@ -12,9 +12,9 @@ export default function Home() {
             {user ? (
                 <div className="loginBtn">
                     <p>{user.name}</p>
-                    <button onClick={logout} className="miniBtn" style={{ backgroundColor: "red", color: "white" }}>
-                        ログアウト
-                    </button>
+                    <Link href={"/auth/profile"} className="miniBtn">
+                        アカウント管理
+                    </Link>
                 </div>
             ) : (
                 <div className="flex my-5">

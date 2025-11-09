@@ -13,7 +13,7 @@ export default function SelectStage() {
             <Link className="btn back" href={"/"}>
                 <LeftSvg />
             </Link>
-            <div className="selectStageText">ステージを選択</div>
+            <div className="selectStageText text-[length:10dvmin]">ステージを選択</div>
             <div className="stageWrapperContainer">
                 <div className="stageWrapper">
                     {process.env.NODE_ENV === "development" && <StageButton i={0} key={0} isCompleted={user?.completedStageIds.includes(0) || false} />}

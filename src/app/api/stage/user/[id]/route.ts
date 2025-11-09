@@ -19,11 +19,16 @@ export const GET = async (_req: NextRequest, { params }: { params: Promise<{ id:
             },
         });
         const creatorMap = new Map(creators.map((creator) => [creator.id, creator.name]));
-        const stagesWithCreatorName = stages.map((stage) => ({
-            ...stage,
-            creatorName: creatorMap.get(stage.creatorId) || "Unknown",
-        }));
-        return NextResponse.json({ message: "success", stages: stagesWithCreatorName }, { status: 200 });
+        return NextResponse.json(
+            {
+                message: "success",
+                stages: stages.map((stage) => ({
+                    ...stage,
+                    creatorName: creatorMap.get(stage.creatorId) || "Unknown",
+                })),
+            },
+            { status: 200 }
+        );
     } catch (err) {
         return NextResponse.json({ message: "error", err }, { status: 500 });
     }

@@ -31,7 +31,7 @@ export default function LoginPage() {
 
     return (
         <div className="backGround">
-            <Link href="/" className="block btn fixed top-2 left-2 w-[18dvmin] h-[12dvmin] z-10">
+            <Link href="/" className="btn back">
                 <LeftSvg />
             </Link>
             <div className="flex flex-col items-center justify-center h-4/5">
@@ -59,11 +59,11 @@ export default function LoginPage() {
                             </label>
                             <input ref={passwordRef} id="password" name="password" type="password" autoComplete="current-password" required className="w-full  border-gray-600 focus:outline-none focus:border-blue-500 bg-white text-[16px]" style={{ padding: "1.5dvmin", borderWidth: "0.2dvmin", color: "black" }} />
                         </div>
-                        <button type="submit" className="w-5/6 font-bold text-white bg-gray-600 hover:bg-gray-700" style={{ padding: "1.5dvmin", fontSize: "8dvmin", marginTop: "4dvmin" }}>
+                        <button type="submit" className="miniBtn w-5/6 font-bold text-white bg-gray-600 hover:bg-gray-700" style={{ padding: "1.5dvmin", fontSize: "8dvmin", marginTop: "4dvmin" }}>
                             ログイン
                         </button>
                         <Link href="/auth/signup" className="block w-5/6">
-                            <button type="button" className="w-full font-bold text-white bg-gray-500 hover:bg-gray-600" style={{ padding: "1.5dvmin", fontSize: "4dvmin", marginTop: "2dvmin" }}>
+                            <button type="button" className="miniBtn w-full font-bold text-white bg-gray-500 hover:bg-gray-600" style={{ padding: "1.5dvmin", fontSize: "4dvmin", marginTop: "2dvmin" }}>
                                 新規アカウントを作成
                             </button>
                         </Link>

@@ -2,7 +2,7 @@
 
 import { LeftSvg } from "@/app/components";
 import { useAuth } from "@/app/context";
-import { postUser } from "@/app/fetch";
+import { postUser, throwError } from "@/app/fetch";
 import Link from "next/link";
 import React, { useRef } from "react";
 
@@ -27,16 +27,15 @@ export default function SignupPage() {
                 } else {
                     throw new Error("登録に失敗しました");
                 }
-            } catch (error) {
-                console.error(error);
-                alert("エラーが発生しました。もう一度お試しください。");
+            } catch (err) {
+                throwError(err);
             }
         }
     };
 
     return (
         <div className="backGround">
-            <Link href="/" className="block btn fixed top-2 left-2 w-[18dvmin] h-[12dvmin] z-10">
+            <Link href="/" className="btn back">
                 <LeftSvg />
             </Link>
             <div className="flex flex-col items-center justify-center h-4/5">
@@ -64,7 +63,7 @@ export default function SignupPage() {
                             </label>
                             <input ref={passwordRef} id="password" name="password" type="password" required className="w-full border-gray-600 focus:outline-none focus:border-blue-500 bg-white text-[16px]" style={{ padding: "1.5dvmin", borderWidth: "0.2dvmin", color: "black" }} />
                         </div>
-                        <button type="submit" className="w-5/6 font-bold text-white bg-gray-600 hover:bg-gray-700" style={{ padding: "1.5dvmin", fontSize: "8dvmin", marginTop: "4dvmin" }}>
+                        <button type="submit" className="miniBtn w-5/6 font-bold text-white bg-gray-600 hover:bg-gray-700" style={{ padding: "1.5dvmin", fontSize: "8dvmin", marginTop: "4dvmin" }}>
                             登録
                         </button>
                     </form>

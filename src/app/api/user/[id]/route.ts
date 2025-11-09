@@ -1,5 +1,6 @@
-import { PrismaClient } from "@/generated/prisma";
+import { PrismaClient, User } from "@/generated/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -17,8 +18,18 @@ export const PUT = async (req: NextRequest, { params }: { params: Promise<{ id: 
     try {
         const id = Number((await params).id);
         const { name, password, completedStageIds } = await req.json();
+        const data: Partial<User> = {};
+        if (name) {
+            data.name = name;
+        }
+        if (password) {
+            data.password = await bcrypt.hash(password, 10);
+        }
+        if (completedStageIds) {
+            data.completedStageIds = completedStageIds;
+        }
         const user = await prisma.user.update({
-            data: { name, password, completedStageIds },
+            data,
             where: { id },
         });
         return NextResponse.json({ message: "success", user: user }, { status: 200 });

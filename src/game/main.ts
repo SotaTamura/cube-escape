@@ -89,12 +89,13 @@ export const loadStage = async (i: number) => {
     pushBlocks = [];
     buttons = [];
     moveBlocks = [];
-    let data: { default: StageData };
+    let data: { default: StageData } | null;
     try {
         data = await import(`./stagesJSON/stage${i}.json`);
     } catch {
-        data = (await import(`./stagesJSON/stage1.json`)) as { default: StageData };
+        data = null;
     }
+    if (!data) return;
     hint = data.default.properties[0].value;
     const allObjs = data.default.layers.flatMap((layer) => (layer.objects ? layer.objects.map((obj) => ({ ...obj, color: layer.tintcolor })) : []));
     for (let obj of allObjs) {

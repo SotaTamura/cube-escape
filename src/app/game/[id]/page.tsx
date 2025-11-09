@@ -2,7 +2,7 @@
 
 import { Application, Container } from "pixi.js";
 import { use, useEffect, useRef, useState } from "react";
-import { RESOLUTION, STAGE_LEN, STEP, UserType } from "@/constants";
+import { RESOLUTION, STAGE_LEN, STEP } from "@/constants";
 import Link from "next/link";
 import { hint, loadStage, update } from "@/game/main";
 import { useAuth } from "@/app/context";
@@ -14,7 +14,7 @@ export let debugContainer: Container;
 export default function Game({ params }: { params: Promise<{ id: string }> }) {
     const id = Number(use(params).id);
     const canvasWrapperRef = useRef<HTMLDivElement>(null);
-    const { addCompletedStage } = useAuth();
+    const { user, changeUserData } = useAuth();
     const [restarter, setRestarter] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     const [isHintShowed, setIsHintShowed] = useState(false);
@@ -61,7 +61,7 @@ export default function Game({ params }: { params: Promise<{ id: string }> }) {
                 accumulator += dt ? dt : 0;
                 while (accumulator >= STEP) {
                     update(async () => {
-                        addCompletedStage(id);
+                        if (user) changeUserData({ property: "completedStageIds", newData: [...user.completedStageIds, id] });
                         setIsComplete(true);
                     });
                     accumulator -= STEP;

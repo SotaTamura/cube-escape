@@ -1,8 +1,9 @@
 "use client";
 
 import { useAuth } from "@/app/context";
+import { postStage } from "@/app/fetch";
 import { useRouter } from "next/navigation";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 export default function AddStage() {
     const router = useRouter();
@@ -11,20 +12,30 @@ export default function AddStage() {
     const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
     const codeRef = useRef<HTMLTextAreaElement | null>(null);
 
+    useEffect(() => {
+        if (!user) {
+            router.push("/auth/login");
+            router.refresh();
+        }
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/stage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                title: titleRef.current?.value,
-                creatorId: user?.id,
-                description: descriptionRef.current?.value,
-                code: codeRef.current?.value,
-            }),
-        });
-        router.push("/editor");
-        router.refresh();
+        if (!user) {
+            router.push("/auth/login");
+            router.refresh();
+        } else if (!codeRef.current?.value) {
+            window.alert("ステージに何も設置されていません。");
+        } else {
+            postStage({
+                title: titleRef.current?.value || "無題",
+                creatorId: user.id,
+                description: descriptionRef.current?.value || "",
+                code: codeRef.current.value,
+            });
+            router.push("/editor");
+            router.refresh();
+        }
     };
 
     return (

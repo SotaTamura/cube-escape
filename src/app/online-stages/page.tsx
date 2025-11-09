@@ -4,6 +4,7 @@ import { useAuth } from "@/app/context";
 import { StageType } from "@/constants";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { getAllStages } from "../fetch";
 
 export default function Lobby() {
     const { user, logout } = useAuth();
@@ -11,20 +12,7 @@ export default function Lobby() {
 
     useEffect(() => {
         (async () => {
-            try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/stage`, {
-                    cache: "no-store",
-                });
-                if (!res.ok) {
-                    setStages([]);
-                    return;
-                }
-                const data = await res.json();
-                setStages(data.stages || []);
-            } catch (error) {
-                console.error(error);
-                setStages([]);
-            }
+            setStages(await getAllStages());
         })();
     }, []);
 
